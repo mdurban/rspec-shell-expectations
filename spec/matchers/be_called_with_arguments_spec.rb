@@ -62,5 +62,23 @@ describe 'be_called_with_arguments' do
         expect(@sub_command).to be_called_with_arguments('first_argument', 'second_argument').at_position(0)
       end
     end
+    context 'and the times chain call' do
+      before(:each) do
+        @command = stubbed_env.stub_command('stubbed_command')
+        @sub_command = @command.with_args('sub_command')
+
+        @actual_stdout, @actual_stderr, @actual_status = stubbed_env.execute(<<-multiline_script
+          stubbed_command sub_command duplicated_arg once_called_arg
+          stubbed_command sub_command duplicated_arg
+        multiline_script
+        )
+      end
+      it 'passes the check when argument is called exactly once' do
+        expect(@sub_command).to be_called_with_arguments('once_called_arg').times(1)
+      end
+      it 'passes the check when argument is called multiple times' do
+        expect(@sub_command).to be_called_with_arguments('duplicated_arg').times(2)
+      end
+    end
   end
 end

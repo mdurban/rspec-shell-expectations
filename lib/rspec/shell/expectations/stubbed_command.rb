@@ -20,13 +20,17 @@ module Rspec
         def with_args(*args)
           StubbedCall.new(@call_configuration, @call_log, args)
         end
-
+        
         def called?
           with_args.called?
         end
-
+        
         def called_with_args?(*args, position: false)
           with_args.called_with_args?(*args, position: position)
+        end
+        
+        def get_argument_count(*arg)
+          @call_log.get_argument_count(*arg)
         end
 
         def returns_exitstatus(statuscode)
