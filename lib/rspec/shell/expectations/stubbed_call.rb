@@ -31,7 +31,7 @@ module Rspec
           return nil unless @call_log.exist?
           @call_log.stdin_for_args(*@args)
         end
-
+        
         def called?
           return false unless @call_log.exist?
           @call_log.called_with_args?(*@args)
@@ -39,6 +39,10 @@ module Rspec
 
         def called_with_args?(*args, position: false)
           @call_log.called_with_args?(*args, sub_command_series: @args, position: position)
+        end
+
+        def get_argument_count(*arg)
+          @call_log.get_argument_count(*arg)
         end
 
         def inspect
