@@ -26,8 +26,6 @@ module Rspec
         end
 
         def get_argument_count(*expected_argument_series, sub_command_series: [], position: false)
-          expected_argument_series ||= []
-
           call_log_list = load_call_log_list
           sub_command_argument_list = get_sub_command_arguments_from_call_log(call_log_list, sub_command_series)
           position_range_argument_list = get_position_range_from_argument_list(sub_command_argument_list, position, expected_argument_series.size)
