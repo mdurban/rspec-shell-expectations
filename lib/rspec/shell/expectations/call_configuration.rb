@@ -25,12 +25,10 @@ module Rspec
         end
 
         def write
-          structure = []
-          @configuration.each do |args, results|
+          structure = @configuration.map do |args, results|
             call = {
               args: args
             }.merge results
-            structure << call
           end
 
           @config_path.open('w') do |f|

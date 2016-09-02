@@ -17,8 +17,7 @@ module Rspec
 
         def stdin_for_args(*args)
           call = find_call(*args)
-          return call['stdin'] if call
-          nil
+          call['stdin'] unless call.nil?
         end
 
         def contains_argument_series?(*contains_arguments)
@@ -38,7 +37,8 @@ module Rspec
         end
 
         def called_with_no_args?
-          load_call_log_list.first["args"].nil?
+          call_log_list = load_call_log_list
+          !call_log_list.empty? and call_log_list.first["args"].nil?
         end
 
         private
