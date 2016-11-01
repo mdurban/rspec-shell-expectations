@@ -11,4 +11,14 @@ RSpec::Matchers.define :be_called_with_arguments do |*expected_argument_list|
 
     called_with_correct_args && called_correct_number_of_times
   end
+
+  failure_message do |actual_command|
+    actual_argument_list = actual_command.call_log.get_call_log_args.flatten
+    expected_argument_list = expected_argument_list.first.split(" ")
+    missing_argument_list = actual_argument_list.reject.with_index do |arg, index|
+      expected_argument_list[index] == arg
+    end
+
+    "Expected to be called with arguments #{expected_argument_list} but was actually called with arguments #{actual_argument_list}. Arguments #{missing_argument_list} are missing or in incorrect order."
+  end
 end

@@ -52,4 +52,27 @@ describe 'be_called_with_arguments' do
       end
     end
   end
+
+  context 'when matcher fails' do
+    before(:each) do
+      @command = stubbed_env.stub_command('stubbed_command')
+      stubbed_env.execute_inline(<<-multiline_script
+        stubbed_command no_match_arg1 no_match_arg2 no_match_arg3 no_match_arg4
+      multiline_script
+      )
+    end
+    it 'should tell me why' do
+      expect(@command).to be_called_with_arguments('bacon, potato')
+    end
+    it 'should fail when one argument is missing' do
+      expect(@command).to be_called_with_arguments('no_match_arg1 no_match_arg2 no_match_arg3')
+    end
+    it 'should fail when all arguments are there but in incorrect order' do
+      expect(@command).to be_called_with_arguments('no_match_arg4 no_match_arg2 no_match_arg3 no_match_arg1')
+    end
+    it 'should fail when there are extra arguments' do
+      expect(@command).to be_called_with_arguments('no_match_arg1 no_match_arg2 no_match_arg3 no_match_arg4, no_match_arg99'), "hello"
+    end
+  end
+
 end
