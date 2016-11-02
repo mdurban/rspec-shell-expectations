@@ -9,8 +9,8 @@ module CustomMatchers
     def matches?(actual_command)
       @actual_command = actual_command
 
-      called_with_correct_args = @actual_command.called_with_args?(*@expected_argument_list)
-      called_correct_number_of_times = @expected_invocations ? @actual_command.call_count(*@expected_argument_list) == @expected_invocations : true
+      called_with_correct_args = actual_command.called_with_args?(*@expected_argument_list)
+      called_correct_number_of_times = @expected_invocations ? actual_command.call_count(*@expected_argument_list) == @expected_invocations : true
 
       called_with_correct_args && called_correct_number_of_times
     end
