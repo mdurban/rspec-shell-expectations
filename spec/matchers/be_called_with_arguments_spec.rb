@@ -70,9 +70,6 @@ describe 'be_called_with_arguments' do
     it 'should fail when all arguments are there but in incorrect order' do
       expect(@command).to be_called_with_arguments('no_match_arg4 no_match_arg2 no_match_arg3 no_match_arg1')
     end
-    it 'should fail when there are extra arguments' do
-      expect(@command).to be_called_with_arguments('no_match_arg1 no_match_arg2 no_match_arg3 no_match_arg4, no_match_arg99'), "hello"
-    end
   end
 
 end
