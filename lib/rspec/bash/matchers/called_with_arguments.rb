@@ -27,7 +27,7 @@ module CustomMatchers
         @expected_argument_list[index] == arg
       end
 
-      "Expected to be called with arguments #{@expected_argument_list} but was actually called with arguments #{actual_argument_list}. Arguments #{missing_argument_list} are missing or in incorrect order."
+      'Expected to be called with arguments [' + @expected_argument_list.join(', ') + '] but was actually called with arguments [' + actual_argument_list.join(', ') + ']. Arguments [' + missing_argument_list.join(', ') + '] are missing or in incorrect order.'
     end
   end
 
