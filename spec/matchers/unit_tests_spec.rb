@@ -5,8 +5,8 @@ describe 'be_called_with_arguments' do
   let(:call_log_mock) { object_double('CallLog') }
   let(:stubbed_command_mock) { object_double('StubbedCommand') }
 
-  context '#failure_message' do
-    it 'returns empty string when matcher is successful' do
+  context '#matches' do
+    it 'matches when stubbed command is called with same arguments' do
       allow(stubbed_command_mock).to receive(:called_with_args?).and_return(true)
 
       matcher = CustomMatchers::CalledWithArgumentsMatcher.new(anything)
@@ -14,9 +14,22 @@ describe 'be_called_with_arguments' do
       expect(matcher.matches? stubbed_command_mock).to be_truthy
     end
     
-    it 'returns message that shows expected and actual arguments when matcher fails' do
+    it 'does not match when stubbed command is called with different arguments' do
+      allow(stubbed_command_mock).to receive(:called_with_args?).and_return(false)
+
+      matcher = CustomMatchers::CalledWithArgumentsMatcher.new(anything)
+
+      expect(matcher.matches? stubbed_command_mock).to be_falsey
+    end
+  end
+
+  context '#failure_message' do
+    before(:each) do
       allow(call_log_mock).to receive(:get_call_log_args).and_return([['actual1', 'actual2']])
       allow(stubbed_command_mock).to receive(:called_with_args?).and_return(false)
+    end
+    
+    it 'returns message that shows expected and actual arguments when matcher fails' do
       allow(stubbed_command_mock).to receive(:call_log).and_return(call_log_mock)
       expected_argument_list = 'expected1 expected2'
 
@@ -27,8 +40,6 @@ describe 'be_called_with_arguments' do
     end
     
     it 'returns message that shows which argument is missing when expected matches one argument but is missing the other' do
-      allow(call_log_mock).to receive(:get_call_log_args).and_return([['actual1', 'actual2']])
-      allow(stubbed_command_mock).to receive(:called_with_args?).and_return(false)
       allow(stubbed_command_mock).to receive(:call_log).and_return(call_log_mock)
       expected_argument_list = 'actual1'
 
@@ -39,8 +50,6 @@ describe 'be_called_with_arguments' do
     end
 
     it 'returns message that shows which argument is out of order when expected matches one argument but is missing the other' do
-      allow(call_log_mock).to receive(:get_call_log_args).and_return([['actual1', 'actual2']])
-      allow(stubbed_command_mock).to receive(:called_with_args?).and_return(false)
       allow(stubbed_command_mock).to receive(:call_log).and_return(call_log_mock)
       expected_argument_list = 'actual2 actual1'
 
@@ -51,8 +60,6 @@ describe 'be_called_with_arguments' do
     end
 
     it 'returns message that shows which argument is extra when all arguments match but there is an extra' do
-      allow(call_log_mock).to receive(:get_call_log_args).and_return([['actual1', 'actual2']])
-      allow(stubbed_command_mock).to receive(:called_with_args?).and_return(false)
       allow(stubbed_command_mock).to receive(:call_log).and_return(call_log_mock)
       expected_argument_list = 'actual1 actual2 extra_arg, extra_arg2'
 
