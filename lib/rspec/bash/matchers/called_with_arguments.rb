@@ -1,4 +1,5 @@
 require 'rspec/expectations'
+require 'differ'
 
 module CustomMatchers
   class CalledWithArgumentsMatcher
@@ -21,13 +22,10 @@ module CustomMatchers
     end
     
     def failure_message
-      actual_argument_list = @actual_command.call_log.get_call_log_args.flatten
-      expected_argument_list = @expected_argument_list.first.split(" ")
-      missing_argument_list = actual_argument_list.reject.with_index do |arg, index|
-        @expected_argument_list[index] == arg
-      end
-
-      'Expected to be called with arguments [' + @expected_argument_list.join(', ') + '] but was actually called with arguments [' + actual_argument_list.join(', ') + ']. Arguments [' + missing_argument_list.join(', ') + '] are missing or in incorrect order.'
+      actual = [@actual_command.call_log.get_call_log_args.first.join(', ').gsub(/\,/,"")].first
+      expected =  @expected_argument_list.first
+      diff = Differ.diff_by_word(actual, expected).format_as(:color)
+      "Expected [#{expected}] but got [#{actual}].\nDiff is #{diff}"
     end
   end
 

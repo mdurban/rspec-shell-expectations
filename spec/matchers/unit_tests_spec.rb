@@ -36,37 +36,37 @@ describe 'be_called_with_arguments' do
       matcher = CustomMatchers::CalledWithArgumentsMatcher.new(expected_argument_list)
 
       expect(matcher.matches? stubbed_command_mock).to be_falsey
-      expect(matcher.failure_message).to include 'Expected to be called with arguments [expected1 expected2] but was actually called with arguments [actual1, actual2].'
+      expect(matcher.failure_message).to include 'Expected [expected1 expected2] but got [actual1 actual2].'
     end
     
-    it 'returns message that shows which argument is missing when expected matches one argument but is missing the other' do
+    it 'returns message that shows colorful diff expected matches one argument but is missing the other' do
       allow(stubbed_command_mock).to receive(:call_log).and_return(call_log_mock)
       expected_argument_list = 'actual1'
 
       matcher = CustomMatchers::CalledWithArgumentsMatcher.new(expected_argument_list)
 
       expect(matcher.matches? stubbed_command_mock).to be_falsey
-      expect(matcher.failure_message).to include 'Arguments [actual2] are missing or in incorrect order'
+      expect(matcher.failure_message).to include "Diff is actual1\e[32m actual2\e[0m" #color codes included
     end
 
-    it 'returns message that shows which argument is out of order when expected matches one argument but is missing the other' do
+    it 'returns diff that shows which argument is out of order when expected matches one argument but is missing the other' do
       allow(stubbed_command_mock).to receive(:call_log).and_return(call_log_mock)
       expected_argument_list = 'actual2 actual1'
 
       matcher = CustomMatchers::CalledWithArgumentsMatcher.new(expected_argument_list)
 
       expect(matcher.matches? stubbed_command_mock).to be_falsey
-      expect(matcher.failure_message).to include 'Arguments [actual1, actual2] are missing or in incorrect order'
+      expect(matcher.failure_message).to include "Diff is \e[31mactual2 \e[0mactual1\e[32m actual2\e[0m" #color codes included
     end
 
-    it 'returns message that shows which argument is extra when all arguments match but there is an extra' do
+    it 'returns diff that shows which argument is extra when all arguments match but there is an extra' do
       allow(stubbed_command_mock).to receive(:call_log).and_return(call_log_mock)
       expected_argument_list = 'actual1 actual2 extra_arg, extra_arg2'
 
       matcher = CustomMatchers::CalledWithArgumentsMatcher.new(expected_argument_list)
 
       expect(matcher.matches? stubbed_command_mock).to be_falsey
-      expect(matcher.failure_message).to include 'Expected arguments [extra_arg1, extra_arg2] are extra.'
+      expect(matcher.failure_message).to include "Diff is actual1 actual2\e[31m extra_arg, extra_arg2\e[0m" #color codes included
     end
 
   end
