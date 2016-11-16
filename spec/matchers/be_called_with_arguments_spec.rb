@@ -1,55 +1,73 @@
-require 'English'
 require 'rspec/bash'
-
-# TODO - the below specs test implementation, until the goofy wiring of StubbedCommand => StubbedCall => CallLog is sorted out
 
 describe 'be_called_with_arguments' do
   include Rspec::Bash
-  let(:stubbed_env) { create_stubbed_env }
+  let(:call_log_mock) { object_double('CallLog') }
+  let(:stubbed_command_mock) { object_double('StubbedCommand') }
 
-  context 'with a command' do
-    context 'and no chain calls' do
-      before(:each) do
-        @command = stubbed_env.stub_command('stubbed_command')
-        @actual_stdout, @actual_stderr, @actual_status = stubbed_env.execute_inline(<<-multiline_script
-          stubbed_command first_argument second_argument
-        multiline_script
-        )
-      end
-      it 'correctly identifies the called arguments' do
-        expect(@command).to be_called_with_arguments('first_argument', 'second_argument')
-      end
-      it 'correctly matches when wildcard is used for first argument' do
-        expect(@command).to be_called_with_arguments(anything, 'second_argument')
-      end
-      it 'correctly matches when wildcard is used for second argument' do
-        expect(@command).to be_called_with_arguments('first_argument', anything)
-      end
-      it 'correctly matches when wildcard is used for all arguments' do
-        expect(@command).to be_called_with_arguments(anything, anything)
-      end
+  context '#matches' do
+    it 'matches when stubbed command is called with same arguments' do
+      allow(stubbed_command_mock).to receive(:called_with_args?).and_return(true)
+
+      matcher = CustomMatchers::CalledWithArgumentsMatcher.new(anything)
+
+      expect(matcher.matches? stubbed_command_mock).to be_truthy
     end
-    context 'and the times chain call' do
-      before(:each) do
-        @command = stubbed_env.stub_command('stubbed_command')
-        @actual_stdout, @actual_stderr, @actual_status = stubbed_env.execute_inline(<<-multiline_script
-          stubbed_command duplicated_argument once_called_argument
-          stubbed_command duplicated_argument irrelevant_argument
-        multiline_script
-        )
-      end
-      it 'matches when arguments are called twice' do
-        expect(@command).to be_called_with_arguments('duplicated_argument', anything).times(2)
-      end
-      it 'matches when argument is called once' do
-        expect(@command).to be_called_with_arguments(anything, 'once_called_argument').times(1)
-      end
-      it 'matches when argument combination is called once' do
-        expect(@command).to be_called_with_arguments('duplicated_argument', 'once_called_argument').times(1)
-      end
-      it 'matches when argument is not called' do
-        expect(@command).to_not be_called_with_arguments('not_called_argument').times(1)
-      end
+    
+    it 'does not match when stubbed command is called with different arguments' do
+      allow(stubbed_command_mock).to receive(:called_with_args?).and_return(false)
+
+      matcher = CustomMatchers::CalledWithArgumentsMatcher.new(anything)
+
+      expect(matcher.matches? stubbed_command_mock).to be_falsey
     end
+  end
+
+  context '#failure_message' do
+    before(:each) do
+      allow(call_log_mock).to receive(:get_call_log_args).and_return([['actual1', 'actual2']])
+      allow(stubbed_command_mock).to receive(:called_with_args?).and_return(false)
+    end
+    
+    it 'returns message that shows expected and actual arguments when matcher fails' do
+      allow(stubbed_command_mock).to receive(:call_log).and_return(call_log_mock)
+      expected_argument_list = 'expected1 expected2'
+
+      matcher = CustomMatchers::CalledWithArgumentsMatcher.new(expected_argument_list)
+
+      expect(matcher.matches? stubbed_command_mock).to be_falsey
+      expect(matcher.failure_message).to include 'Expected [expected1 expected2] but got [actual1 actual2].'
+    end
+    
+    it 'returns message that shows colorful diff expected matches one argument but is missing the other' do
+      allow(stubbed_command_mock).to receive(:call_log).and_return(call_log_mock)
+      expected_argument_list = 'actual1'
+
+      matcher = CustomMatchers::CalledWithArgumentsMatcher.new(expected_argument_list)
+
+      expect(matcher.matches? stubbed_command_mock).to be_falsey
+      expect(matcher.failure_message).to include "Diff is actual1\e[32m actual2\e[0m" #color codes included
+    end
+
+    it 'returns diff that shows which argument is out of order when expected matches one argument but is missing the other' do
+      allow(stubbed_command_mock).to receive(:call_log).and_return(call_log_mock)
+      expected_argument_list = 'actual2 actual1'
+
+      matcher = CustomMatchers::CalledWithArgumentsMatcher.new(expected_argument_list)
+
+      expect(matcher.matches? stubbed_command_mock).to be_falsey
+      expect(matcher.failure_message).to include "Diff is \e[31mactual2 \e[0mactual1\e[32m actual2\e[0m" #color codes included
+    end
+
+    it 'returns diff that shows which argument is extra when all arguments match but there is an extra' do
+      allow(stubbed_command_mock).to receive(:call_log).and_return(call_log_mock)
+      expected_argument_list = 'actual1 actual2 extra_arg, extra_arg2'
+
+      matcher = CustomMatchers::CalledWithArgumentsMatcher.new(expected_argument_list)
+
+      expect(matcher.matches? stubbed_command_mock).to be_falsey
+      expect(matcher.failure_message).to include "Diff is actual1 actual2\e[31m extra_arg, extra_arg2\e[0m" #color codes included
+    end
+
   end
 end
