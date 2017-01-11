@@ -5,7 +5,8 @@ require 'yaml'
 command = File.basename(__FILE__)
 folder = File.dirname(__FILE__)
 
-call_logs = Pathname.new(folder).join("#{command}_calls.yml")
+#call_logs = Pathname.new(folder).join("#{command}_calls.yml")
+call_logs = Pathname.new(File.join(folder, "#{command}_calls.yml"))
 call_logs.open('a') do |f|
   f.puts '- args:'
   ARGV.each { |arg| f.puts "  - #{arg.inspect}" }
@@ -29,7 +30,8 @@ def interpolate_argument(name)
   ARGV[data[1].to_i - 1]
 end
 
-call_configurations = Pathname.new(folder).join("#{command}_stub.yml")
+#call_configurations = Pathname.new(folder).join("#{command}_stub.yml")
+call_configurations = Pathname.new(File.join(folder, "#{command}_stub.yml"))
 if call_configurations.exist?
   config = YAML.load call_configurations.read
 

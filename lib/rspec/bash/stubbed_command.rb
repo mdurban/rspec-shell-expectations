@@ -8,11 +8,11 @@ module Rspec
         FileUtils.cp(stub_filepath, command_path)
         @arguments = []
         @call_configuration = CallConfiguration.new(
-          Pathname.new(dir).join("#{command}_stub.yml"),
+          Pathname.new(File.join(dir, "#{command}_stub.yml")),
           command
         )
         @call_log = CallLog.new(
-          Pathname.new(dir).join("#{command}_calls.yml")
+          Pathname.new(File.join(dir, "#{command}_calls.yml"))
         )
       end
 

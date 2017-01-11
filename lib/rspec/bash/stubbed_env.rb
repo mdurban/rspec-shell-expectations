@@ -1,6 +1,7 @@
 require 'tmpdir'
 require 'English'
 require 'open3'
+require 'fileutils'
 
 module Rspec
   # Define stubbed environment to set and assert expectations
@@ -39,6 +40,16 @@ module Rspec
       end
 
       def execute_function(script, command, env_vars = {})
+
+        if command.include? '/'
+          command_path = command[/.*\//]
+          if command.start_with? '/'
+            @dir << command_path
+          else
+            @dir << '/' << command_path
+          end
+        end
+
         full_command = get_wrapped_execution_with_function_overrides(
           <<-multiline_script
             source #{script}
@@ -62,11 +73,16 @@ module Rspec
         function_command_path_binding_for_template = File.join(@dir, command)
 
         function_override_file_path = File.join(@dir, "#{command}_overrides.sh")
+        p "command: #{command}", "file_path: #{function_override_file_path}"
         function_override_file_template = ERB.new(
           File.new(function_override_template_path).read, nil, '%'
         )
         function_override_file_content = function_override_file_template.result(binding)
 
+        if command.include? '/'
+          command_path = command[/.*\//]
+          FileUtils::mkdir_p "#{@dir}/#{command_path}"
+        end
         File.write(function_override_file_path, function_override_file_content)
       end
 
