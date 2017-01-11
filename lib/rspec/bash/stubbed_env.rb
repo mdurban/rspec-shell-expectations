@@ -41,14 +41,7 @@ module Rspec
 
       def execute_function(script, command, env_vars = {})
 
-        if command.include? '/'
-          command_path = command[/.*\//]
-          if command.start_with? '/'
-            @dir << command_path
-          else
-            @dir << '/' << command_path
-          end
-        end
+        add_command_path_to_stub(command) if command_includes_path?(command)
 
         full_command = get_wrapped_execution_with_function_overrides(
           <<-multiline_script
@@ -73,17 +66,30 @@ module Rspec
         function_command_path_binding_for_template = File.join(@dir, command)
 
         function_override_file_path = File.join(@dir, "#{command}_overrides.sh")
-        p "command: #{command}", "file_path: #{function_override_file_path}"
         function_override_file_template = ERB.new(
           File.new(function_override_template_path).read, nil, '%'
         )
         function_override_file_content = function_override_file_template.result(binding)
 
-        if command.include? '/'
+        make_directory_of_command_path(command) if command_includes_path?(command)
+
+        File.write(function_override_file_path, function_override_file_content)
+      end
+
+      def command_includes_path?(command)
+        command.include? '/'
+      end
+
+      def make_directory_of_command_path(command)
           command_path = command[/.*\//]
           FileUtils::mkdir_p "#{@dir}/#{command_path}"
-        end
-        File.write(function_override_file_path, function_override_file_content)
+      end
+
+      def add_command_path_to_stub(command)
+          command_path = command[/.*\//]
+
+          @dir << '/' if !command.start_with? '/'
+          @dir << command_path
       end
 
       def get_wrapped_execution_with_function_overrides(execution_snippet)

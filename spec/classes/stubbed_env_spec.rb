@@ -201,7 +201,6 @@ describe 'StubbedEnv' do
           end
 
           it 'prints the relative path overridden output' do
-            #sleep 200
             expect(@stdout).to eql('i was overridden in a path')
           end
         end
