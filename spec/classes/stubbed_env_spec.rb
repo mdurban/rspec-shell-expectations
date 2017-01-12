@@ -187,7 +187,8 @@ describe 'StubbedEnv' do
       context 'and a path' do
         context 'relative path' do
           before(:each) do
-            @overridden_path_function = subject.stub_command('relative/path/to/overridden_path_functions')
+            @overridden_path_function =
+              subject.stub_command('relative/path/to/overridden_path_functions')
             @overridden_path_function.outputs('i was overridden in a path')
 
             @stdout, @stderr, @status = subject.execute_function(
@@ -206,7 +207,8 @@ describe 'StubbedEnv' do
         end
         context 'absolute path' do
           before(:each) do
-            @overridden_path_function = subject.stub_command('/absolute/path/to/overridden_path_functions')
+            @overridden_path_function =
+              subject.stub_command('/absolute/path/to/overridden_path_functions')
             @overridden_path_function.outputs('i was overridden in a path')
 
             @stdout, @stderr, @status = subject.execute_function(

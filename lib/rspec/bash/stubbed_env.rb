@@ -40,7 +40,6 @@ module Rspec
       end
 
       def execute_function(script, command, env_vars = {})
-
         add_command_path_to_stub(command) if command_includes_path?(command)
 
         full_command = get_wrapped_execution_with_function_overrides(
@@ -81,15 +80,15 @@ module Rspec
       end
 
       def make_directory_of_command_path(command)
-          command_path = command[/.*\//]
-          FileUtils::mkdir_p "#{@dir}/#{command_path}"
+        command_path = command[%r{.*/}]
+        FileUtils.mkdir_p "#{@dir}/#{command_path}"
       end
 
       def add_command_path_to_stub(command)
-          command_path = command[/.*\//]
+        command_path = command[%r{.*/}]
 
-          @dir << '/' if !command.start_with? '/'
-          @dir << command_path
+        @dir << '/' unless command.start_with? '/'
+        @dir << command_path
       end
 
       def get_wrapped_execution_with_function_overrides(execution_snippet)
