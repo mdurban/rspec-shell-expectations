@@ -1,8 +1,8 @@
 /usr/bin/env bash -c '
 # load in command and function overrides
-pattern="(/.*)( |$).*"
-[[ $(whereis ls) =~ $pattern ]]
-system_ls=${BASH_REMATCH[1]}
+system_ls=$(which ls)
+system_grep=$(which grep)
+
 for override_file in $(${system_ls} -d <%=function_override_path_binding_for_template%> 2> /dev/null); do
   source ${override_file}
 done
@@ -13,8 +13,6 @@ done
 command_exit_code=$?
 
 # filter stderr for readonly problems
-[[ $(whereis grep) =~ $pattern ]]
-system_grep="${BASH_REMATCH[1]}"
 ${system_grep} -v "readonly function" <%=wrapped_error_path_binding_for_template%> >&2
 
 # return original exit code

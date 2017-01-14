@@ -16,13 +16,10 @@ module Rspec
 
       def initialize
         @dir = Dir.mktmpdir
-        ENV['PATH'] = "#{@dir}:#{ENV['PATH']}"
         at_exit { cleanup }
       end
 
       def cleanup
-        paths = (ENV['PATH'].split ':') - [@dir]
-        ENV['PATH'] = paths.join ':'
         FileUtils.remove_entry_secure @dir if Pathname.new(@dir).exist?
       end
 
@@ -34,7 +31,7 @@ module Rspec
       def execute(command, env_vars = {})
         full_command = get_wrapped_execution_with_function_overrides(
           <<-multiline_script
-            #{env} source #{command}
+            source #{command}
           multiline_script
         )
 
@@ -45,7 +42,7 @@ module Rspec
         full_command = get_wrapped_execution_with_function_overrides(
           <<-multiline_script
             source #{script}
-            #{env} #{command}
+            #{command}
           multiline_script
         )
 
@@ -83,10 +80,6 @@ module Rspec
         )
 
         function_override_wrapper_template.result(binding)
-      end
-
-      def env
-        "PATH=#{@dir}:$PATH"
       end
 
       def function_override_template_path
