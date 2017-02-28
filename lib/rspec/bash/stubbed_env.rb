@@ -2,6 +2,7 @@ require 'tmpdir'
 require 'English'
 require 'open3'
 require 'fileutils'
+require 'pathname'
 
 module Rspec
   # Define stubbed environment to set and assert expectations
@@ -29,12 +30,10 @@ module Rspec
         StubbedCommand.new command, @dir
       end
 
-      def execute(command, env_vars = {})
-        # add_command_path_to_stub(command) if command_includes_path?(command)
-
+      def execute(command_file, env_vars = {})
         full_command = get_wrapped_execution_with_function_overrides(
           <<-multiline_script
-            source #{command}
+            source #{command_file}
           multiline_script
         )
 
@@ -74,7 +73,15 @@ module Rspec
 
         make_directory_of_command_path(command) if command_includes_path?(command)
 
+        create_mock_at_root_level(command, function_override_file_content) if command_includes_path?(command)
+
         File.write(function_override_file_path, function_override_file_content)
+      end
+
+      def create_mock_at_root_level(command, function_override_file_content)
+        command_name = Pathname.new("#{command}").basename.to_s
+        f1 = File.join(@dir, "#{command_name}_overrides.sh")
+        File.write(f1, function_override_file_content)
       end
 
       def command_includes_path?(command)
@@ -90,12 +97,11 @@ module Rspec
         command_path = command[%r{.*/}]
 
         @dir << '/' unless command.start_with? '/'
-        @dir << command_path
+        @dir << command_path.chomp('/')
       end
 
       def get_wrapped_execution_with_function_overrides(execution_snippet)
         execution_binding_for_template = execution_snippet
-        @dir << '/absolute/path/to/'
         function_override_path_binding_for_template = "#{@dir}/*_overrides.sh"
         wrapped_error_path_binding_for_template = "#{@dir}/errors"
 
