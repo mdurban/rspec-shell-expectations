@@ -30,6 +30,8 @@ module Rspec
       end
 
       def execute(command, env_vars = {})
+        # add_command_path_to_stub(command) if command_includes_path?(command)
+
         full_command = get_wrapped_execution_with_function_overrides(
           <<-multiline_script
             source #{command}
@@ -93,6 +95,7 @@ module Rspec
 
       def get_wrapped_execution_with_function_overrides(execution_snippet)
         execution_binding_for_template = execution_snippet
+        @dir << '/absolute/path/to/'
         function_override_path_binding_for_template = "#{@dir}/*_overrides.sh"
         wrapped_error_path_binding_for_template = "#{@dir}/errors"
 
