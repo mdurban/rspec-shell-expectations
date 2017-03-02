@@ -30,10 +30,10 @@ module Rspec
         StubbedCommand.new command, @dir
       end
 
-      def execute(command_file, env_vars = {})
+      def execute(command, env_vars = {})
         full_command = get_wrapped_execution_with_function_overrides(
           <<-multiline_script
-            source #{command_file}
+            source #{command}
           multiline_script
         )
 
@@ -41,7 +41,7 @@ module Rspec
       end
 
       def execute_function(script, command, env_vars = {})
-        add_command_path_to_stub(command) if command_includes_path?(command)
+        add_command_path_to_stub(command) if includes_path?(command)
 
         full_command = get_wrapped_execution_with_function_overrides(
           <<-multiline_script
@@ -71,21 +71,21 @@ module Rspec
         )
         function_override_file_content = function_override_file_template.result(binding)
 
-        make_directory_of_command_path(command) if command_includes_path?(command)
-
-        create_mock_at_root_level(command, function_override_file_content) if command_includes_path?(command)
+        mock_command_with_path(command, function_override_file_content) if includes_path?(command)
 
         File.write(function_override_file_path, function_override_file_content)
       end
 
-      def create_mock_at_root_level(command, function_override_file_content)
-        command_name = Pathname.new("#{command}").basename.to_s
-        f1 = File.join(@dir, "#{command_name}_overrides.sh")
-        File.write(f1, function_override_file_content)
+      def includes_path?(command)
+        command.include? '/'
       end
 
-      def command_includes_path?(command)
-        command.include? '/'
+      def mock_command_with_path(command, function_override_file_content)
+        make_directory_of_command_path(command)
+
+        command_name = Pathname.new(command.to_s).basename.to_s
+        command_overrides_file = File.join(@dir, "#{command_name}_overrides.sh")
+        File.write(command_overrides_file, function_override_file_content)
       end
 
       def make_directory_of_command_path(command)
@@ -97,7 +97,7 @@ module Rspec
         command_path = command[%r{.*/}]
 
         @dir << '/' unless command.start_with? '/'
-        @dir << command_path.chomp('/')
+        @dir << command_path
       end
 
       def get_wrapped_execution_with_function_overrides(execution_snippet)

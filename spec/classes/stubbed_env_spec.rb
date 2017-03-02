@@ -166,8 +166,8 @@ describe 'StubbedEnv' do
       context 'and no arguments' do
         before(:each) do
           @stdout, @stderr, @status = subject.execute_function(
-              './spec/scripts/function_library.sh',
-              'overridden_function'
+            './spec/scripts/function_library.sh',
+            'overridden_function'
           )
         end
 

@@ -9,13 +9,13 @@ describe 'scenario where command with path is mocked' do
     let!(:absolute_path_mock) { stubbed_env.stub_command('/absolute/path/to/command') }
     let!(:relative_path_mock) { stubbed_env.stub_command('relative/path/to/other/command2') }
 
-    it 'does not call the grep command' do
+    it 'calls absolute path mock' do
       stubbed_env.execute_inline('/absolute/path/to/command')
 
       expect(absolute_path_mock).to be_called
     end
 
-    it 'does not call the ls command' do
+    it 'calls relative path mock' do
       stubbed_env.execute_inline('relative/path/to/other/command2')
 
       expect(relative_path_mock).to be_called
@@ -46,23 +46,22 @@ describe 'scenario where command with path is mocked' do
     let!(:absolute_path_mock) { stubbed_env.stub_command('/absolute/path/to/command') }
     let!(:relative_path_mock) { stubbed_env.stub_command('relative/path/to/command2') }
 
-    it 'arbitrary_command is mocked' do
+    it 'regular command is mocked' do
       stubbed_env.execute(script_path)
 
-      expect(arbitrary_command_mock).to be_called # TODO - works if this is only command in script
+      expect(arbitrary_command_mock).to be_called
     end
 
-    it '/absolute/path/to/command is mocked' do
+    it 'absolute path command is mocked' do
       stubbed_env.execute(script_path)
 
-      expect(absolute_path_mock).to be_called # TODO - works if this is only command in script
+      expect(absolute_path_mock).to be_called
     end
 
-    it 'relative/path/to/command is mocked' do
+    it 'relative path command is mocked' do
       stubbed_env.execute(script_path)
 
-      expect(relative_path_mock).to be_called # TODO - works if this is only command in script
+      expect(relative_path_mock).to be_called
     end
   end
-
 end
