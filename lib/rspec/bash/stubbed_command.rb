@@ -7,11 +7,11 @@ module Rspec
         @path = create_stub_file(command, dir)
         @arguments = []
         @call_configuration = CallConfiguration.new(
-          Pathname.new(dir).join("#{command}_stub.yml"),
+          Pathname.new(File.join(dir, "#{command}_stub.yml")),
           command
         )
         @call_log = CallLog.new(
-          Pathname.new(dir).join("#{command}_calls.yml")
+          Pathname.new(File.join(dir, "#{command}_calls.yml"))
         )
       end
 

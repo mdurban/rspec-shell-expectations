@@ -184,6 +184,49 @@ describe 'StubbedEnv' do
         end
       end
 
+      context 'and a path' do
+        context 'relative path' do
+          before(:each) do
+            @overridden_path_function =
+              subject.stub_command('relative/path/to/overridden_path_functions')
+            @overridden_path_function.outputs('i was overridden in a path')
+
+            @stdout, @stderr, @status = subject.execute_function(
+              './spec/scripts/function_library.sh',
+              'relative/path/to/overridden_path_functions'
+            )
+          end
+
+          it 'calls the relative path stubbed function' do
+            expect(@overridden_path_function).to be_called
+          end
+
+          it 'prints the relative path overridden output' do
+            expect(@stdout).to eql('i was overridden in a path')
+          end
+        end
+        context 'absolute path' do
+          before(:each) do
+            @overridden_path_function =
+              subject.stub_command('/absolute/path/to/overridden_path_functions')
+            @overridden_path_function.outputs('i was overridden in a path')
+
+            @stdout, @stderr, @status = subject.execute_function(
+              './spec/scripts/function_library.sh',
+              '/absolute/path/to/overridden_path_functions'
+            )
+          end
+
+          it 'calls the stubbed function' do
+            expect(@overridden_path_function).to be_called
+          end
+
+          it 'prints the overridden output' do
+            expect(@stdout).to eql('i was overridden in a path')
+          end
+        end
+      end
+
       context 'and simple arguments' do
         before(:each) do
           @stdout, @stderr, @status = subject.execute_function(
