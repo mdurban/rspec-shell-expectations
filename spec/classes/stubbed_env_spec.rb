@@ -100,7 +100,7 @@ describe 'StubbedEnv' do
       subject.stub_command('first_command')
       subject.stub_command('second_command')
     end
-    disallowed_commands = %w(/usr/bin/env bash readonly function)
+    disallowed_commands = %w(command function)
     disallowed_commands.each do |command|
       it "does not allow #{command}" do
         expect { subject.stub_command(command) }.to raise_error(
@@ -112,7 +112,7 @@ describe 'StubbedEnv' do
   context '#execute' do
     it 'wraps the file to execute and sends it to Open3' do
       allow(stub_wrapper).to receive(:wrap_script)
-        .with('source file_to_execute')
+        .with('command source file_to_execute')
         .and_return('wrapped script')
       expect(Open3).to receive(:capture3)
         .with({ 'DOG' => 'cat' }, 'wrapped script')
@@ -123,7 +123,7 @@ describe 'StubbedEnv' do
   context('#execute_function') do
     it 'wraps the file to execute and sends it to Open3' do
       allow(stub_wrapper).to receive(:wrap_script)
-        .with("source file_to_execute\nfunction_to_execute")
+        .with("command source file_to_execute\nfunction_to_execute")
         .and_return('wrapped script')
       expect(Open3).to receive(:capture3)
         .with({ 'DOG' => 'cat' }, 'wrapped script')
@@ -151,7 +151,7 @@ describe 'StubbedEnv' do
     end
     it 'wraps the file to execute and sends it to Open3' do
       allow(stub_wrapper).to receive(:wrap_script)
-        .with('source file_to_execute')
+        .with('command source file_to_execute')
         .and_return('wrapped script')
       expect(Open3).to receive(:capture3)
         .with({ 'DOG' => 'cat' }, 'wrapped script')

@@ -11,7 +11,7 @@ module Rspec
       end
 
       def footer(name)
-        "}\nreadonly -f #{name} &> /dev/null"
+        "}\ncommand readonly -f #{name} &> /dev/null"
       end
 
       def body(name)

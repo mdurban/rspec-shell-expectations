@@ -5,8 +5,8 @@
 ) 2> <%=stderr_output_path%>
 command_exit_code=$?
 
-/usr/bin/env bash <<EOF
+command bash <<EOF
   grep -v "readonly function" <%=stderr_output_path%> >&2
 EOF
 
-exit ${command_exit_code}
+command exit ${command_exit_code}

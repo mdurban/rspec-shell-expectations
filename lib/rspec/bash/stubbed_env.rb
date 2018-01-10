@@ -32,13 +32,13 @@ module Rspec
       end
 
       def execute(command, env_vars = {})
-        script_runner = "source #{command}"
+        script_runner = "command source #{command}"
         script_wrapper = wrap_script(script_runner)
         execute_script(env_vars, script_wrapper)
       end
 
       def execute_function(script, command, env_vars = {})
-        script_runner = "source #{script}\n#{command}"
+        script_runner = "command source #{script}\n#{command}"
         script_wrapper = wrap_script(script_runner)
         execute_script(env_vars, script_wrapper)
       end
@@ -62,7 +62,7 @@ module Rspec
         RUBY_STUB => RubyStubScript,
         BASH_STUB => BashStubScript
       }.freeze
-      DISALLOWED_COMMANDS = %w(/usr/bin/env bash readonly function).freeze
+      DISALLOWED_COMMANDS = %w(command function).freeze
 
       def create_tcp_server
         tcp_server = TCPServer.new('localhost', 0)
