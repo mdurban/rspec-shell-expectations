@@ -1,31 +1,6 @@
 require 'spec_helper'
 include Rspec::Bash
 
-def execute_script(script)
-  let!(:execute_results) do
-    stdout, stderr, status = stubbed_env.execute_inline(
-      script
-    )
-    [stdout, stderr, status]
-  end
-  let(:stdout) { execute_results[0] }
-  let(:stderr) { execute_results[1] }
-  let(:exitcode) { execute_results[2].exitstatus }
-end
-
-def execute_function(script, function)
-  let!(:execute_results) do
-    stdout, stderr, status = stubbed_env.execute_function(
-      script,
-      function
-    )
-    [stdout, stderr, status]
-  end
-  let(:stdout) { execute_results[0] }
-  let(:stderr) { execute_results[1] }
-  let(:exitcode) { execute_results[2].exitstatus }
-end
-
 describe('StubbedEnv override tests') do
   subject { create_stubbed_env }
   let(:stubbed_env) { subject }

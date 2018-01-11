@@ -1,18 +1,6 @@
 require 'spec_helper'
 include Rspec::Bash
 
-def execute_script(script)
-  let!(:execute_results) do
-    stdout, stderr, status = stubbed_env.execute_inline(
-      script
-    )
-    [stdout, stderr, status]
-  end
-  let(:stdout) { execute_results[0] }
-  let(:stderr) { execute_results[1] }
-  let(:exitcode) { execute_results[2].exitstatus }
-end
-
 describe 'StubbedCommand' do
   let(:stubbed_env) { create_stubbed_env }
   let!(:command) { stubbed_env.stub_command('stubbed_command') }
