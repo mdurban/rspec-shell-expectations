@@ -170,24 +170,20 @@ describe 'BashStub' do
           Sparsify.sparse(
             {
               exitcode: 10_000,
-              outputs: [
-                {
-                  target: 'stdout',
+              outputs: {
+                stdout: {
+                  target: :stdout,
                   content: "stdout\nstdout,stdout"
                 },
-                {
-                  target: 'stdout',
-                  content: 1
-                },
-                {
-                  target: 'stderr',
+                stderr: {
+                  target: :stderr,
                   content: "stderr\" stderr\nstderr"
                 },
-                {
+                'tofile' => {
                   target: 'tofile',
                   content: "tofile\ntofile:\", tofile"
                 }
-              ]
+              }
             }, sparse_array: true
           ), indent: '', space: ''
         )
@@ -208,6 +204,14 @@ describe 'BashStub' do
         )
         expect(stdout.chomp).to eql "stdout\\nstdout,stdout\nstderr\\\" stderr\\nstderr" \
         "\ntofile\\ntofile:\\\", tofile"
+      end
+
+      it 'extracts a multiple value field with a dynamic key' do
+        stdout, _stderr = stubbed_env.execute_function(
+          BashStubScript.path,
+          "extract-string-properties '#{call_conf}' 'outputs\\..*\\.target'"
+        )
+        expect(stdout.chomp).to eql "stdout\nstderr\ntofile"
       end
     end
   end
