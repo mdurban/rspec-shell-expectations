@@ -1,18 +1,6 @@
 require 'spec_helper'
 include Rspec::Bash
 
-def execute_script(script)
-  let!(:execute_results) do
-    stdout, stderr, status = stubbed_env.execute_inline(
-      script
-    )
-    [stdout, stderr, status]
-  end
-  let(:stdout) { execute_results[0] }
-  let(:stderr) { execute_results[1] }
-  let(:exitcode) { execute_results[2].exitstatus }
-end
-
 describe 'StubbedCommand' do
   let(:stubbed_env) { create_stubbed_env }
   let!(:command) { stubbed_env.stub_command('stubbed_command') }
@@ -275,6 +263,25 @@ describe 'StubbedCommand' do
 
         after(:each) do
           FileUtils.remove_entry_secure dynamic_file
+        end
+      end
+
+      describe 'when given a filename that matches the stdout target' do
+        let(:stdout_file) { Pathname.new('stdout') }
+
+        before do
+          command
+            .outputs('i am supposed to go to a file', to: 'stdout')
+        end
+
+        execute_script('stubbed_command poglet piglet')
+
+        it 'outputs the expected content to the file' do
+          expect(stdout_file.read).to eql 'i am supposed to go to a file'
+        end
+
+        after(:each) do
+          FileUtils.remove_entry_secure stdout_file
         end
       end
     end
