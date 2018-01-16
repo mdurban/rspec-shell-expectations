@@ -64,17 +64,21 @@ function extract-string-properties {
 }
 
 function print-output {
-  case ${1} in
+  local type=${1}
+  local target=${2}
+  local content=${3}
+
+  case ${type} in
     stdout)
-      echo -en "${2}"
+      echo -en "${content}"
       ;;
     stderr)
-      echo -en "${2}" >&2
+      echo -en "${content}" >&2
       ;;
-    '')
-      ;;
-    *)
-      echo -en "${2}" > "${1}"
+    file)
+      if [[ -n "${target}" ]]; then
+          echo -en "${content}" > "${target}"
+      fi
       ;;
   esac
 }
@@ -83,13 +87,15 @@ function main {
   server_message=$(send-to-server "${2}" "${client_message}")
   IFS=$'\n'
   target_list=( $(extract-string-properties "${server_message}" "outputs\..*\.target") )
+  type_list=( $(extract-string-properties "${server_message}" "outputs\..*\.type") )
   content_list=( $(extract-string-properties "${server_message}" "outputs\..*\.content") )
   exit_code=$(extract-number-properties "${server_message}" "exitcode")
 
   for index in "${!target_list[@]}"; do
     target=${target_list[${index}]}
+    type=${type_list[${index}]}
     content=$(json-decode "${content_list[${index}]}")
-    print-output "${target}" "${content}"
+    print-output "${type}" "${target}" "${content}"
   done
 
   exit ${exit_code}

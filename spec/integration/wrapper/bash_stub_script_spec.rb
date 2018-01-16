@@ -213,8 +213,8 @@ describe 'BashStub' do
   end
 
   context '.print-output' do
-    context 'given a stdout target and its associated content' do
-      execute_script("print-output 'stdout' '\\nstdout \\\\nstdout\nstdout\\n'")
+    context 'given a stdout type and target and its associated content' do
+      execute_script("print-output 'stdout' 'stdout' '\\nstdout \\\\nstdout\nstdout\\n'")
 
       it 'prints the output to stdout' do
         expect(stdout).to eql "\nstdout \\nstdout\nstdout\n"
@@ -225,8 +225,8 @@ describe 'BashStub' do
       end
     end
 
-    context 'given a stderr target and its associated content' do
-      execute_script("print-output 'stderr' '\\nstderr \\\\nstderr\nstderr\\n'")
+    context 'given a stderr type and target and its associated content' do
+      execute_script("print-output 'stderr' 'stderr' '\\nstderr \\\\nstderr\nstderr\\n'")
 
       it 'prints the output to stderr' do
         expect(stderr).to eql "\nstderr \\nstderr\nstderr\n"
@@ -237,8 +237,8 @@ describe 'BashStub' do
       end
     end
 
-    context 'given a file target (anything but stderr or stdout)' do
-      execute_script("print-output '<temp file>' '\\ntofile \\\\ntofile\ntofile\\n'")
+    context 'given a file type and target (anything but stderr or stdout)' do
+      execute_script("print-output 'file' '<temp file>' '\\ntofile \\\\ntofile\ntofile\\n'")
 
       it 'prints the output to the file' do
         expect(temp_file.read).to eql "\ntofile \\ntofile\ntofile\n"
@@ -252,8 +252,8 @@ describe 'BashStub' do
         expect(stdout.chomp).to eql ''
       end
     end
-    context 'given a file target that is an empty string' do
-      execute_script("print-output '' '\\ntofile \\\\ntofile\ntofile\\n'")
+    context 'given a file type and target that is an empty string' do
+      execute_script("print-output 'file' '' '\\ntofile \\\\ntofile\ntofile\\n'")
 
       it 'does not exit with a non-zero exit code' do
         expect(exit_code).to eql 0
@@ -352,6 +352,9 @@ describe 'BashStub' do
           .with_args('call conf', 'outputs\..*\.target')
           .outputs("stdout\nstderr\ntofile\n")
         @extract_string_properties
+          .with_args('call conf', 'outputs\..*\.type')
+          .outputs("stdout\nstderr\nfile\n")
+        @extract_string_properties
           .with_args('call conf', 'outputs\..*\.content')
           .outputs("\\nstd out\\n\n\\nstd err\\n\n\\nto file\\n\n")
         @extract_number_properties.with_args('call conf', 'exitcode').outputs("3\n")
@@ -390,13 +393,13 @@ describe 'BashStub' do
       end
       it 'prints the extracted outputs (with newlines still escaped)' do
         expect(@print_output).to be_called_with_arguments(
-          'stdout', '\nstd out\n'
+          'stdout', 'stdout', '\nstd out\n'
         )
         expect(@print_output).to be_called_with_arguments(
-          'stderr', '\nstd err\n'
+          'stderr', 'stderr', '\nstd err\n'
         )
         expect(@print_output).to be_called_with_arguments(
-          'tofile', '\nto file\n'
+          'file', 'tofile', '\nto file\n'
         )
       end
       it 'exits with the extracted exit code' do

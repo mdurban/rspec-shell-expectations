@@ -90,6 +90,7 @@ describe 'CallConfiguration' do
               outputs: [
                 {
                   target: :stderr,
+                  type: :stderr,
                   content: '2'
                 }
               ]
@@ -110,6 +111,7 @@ describe 'CallConfiguration' do
               outputs: [
                 {
                   target: :stderr,
+                  type: :stderr,
                   content: 'new_content'
                 }
               ]
@@ -130,6 +132,7 @@ describe 'CallConfiguration' do
               outputs: [
                 {
                   target: :stdout,
+                  type: :stdout,
                   content: 'different_content'
                 }
               ]
@@ -140,6 +143,7 @@ describe 'CallConfiguration' do
               outputs: [
                 {
                   target: :stderr,
+                  type: :stderr,
                   content: 'new_content'
                 }
               ]
@@ -154,6 +158,7 @@ describe 'CallConfiguration' do
               outputs: [
                 {
                   target: :stdout,
+                  type: :stdout,
                   content: 'different_content'
                 }
               ]
@@ -174,10 +179,12 @@ describe 'CallConfiguration' do
               outputs: [
                 {
                   target: :stdout,
+                  type: :stdout,
                   content: 'old_content'
                 },
                 {
                   target: :stderr,
+                  type: :stderr,
                   content: 'new_content'
                 }
               ]
@@ -192,6 +199,7 @@ describe 'CallConfiguration' do
               outputs: [
                 {
                   target: :stdout,
+                  type: :stdout,
                   content: 'old_content'
                 }
               ]
@@ -234,6 +242,7 @@ describe 'CallConfiguration' do
             exitcode: 2,
             outputs: [
               target: 'first_argument-something-second_argument-another.txt',
+              type: :file,
               content: 'dynamically generated file name contents'
             ]
           }
@@ -250,6 +259,7 @@ describe 'CallConfiguration' do
                   :arg2,
                   '-another.txt'
                 ],
+                type: :file,
                 content: 'dynamically generated file name contents'
               ]
             }

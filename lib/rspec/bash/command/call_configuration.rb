@@ -16,8 +16,10 @@ module Rspec
 
       def add_output(content, target, args = [])
         current_conf = create_or_get_conf(args)
+        type = determine_output_type(target)
         current_conf[:outputs] << {
           target: target,
+          type: type,
           content: content.to_s
         }
       end
@@ -70,6 +72,11 @@ module Rspec
         current_conf = @call_configuration.select { |conf| conf[:args] == args }
         @call_configuration << new_conf if current_conf.empty?
         current_conf.first || new_conf
+      end
+
+      def determine_output_type(target)
+        is_a_file_target = !([:stdout, :stderr].include? target)
+        is_a_file_target ? :file : target
       end
     end
   end

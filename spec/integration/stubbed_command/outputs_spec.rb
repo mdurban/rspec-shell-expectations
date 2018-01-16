@@ -265,6 +265,25 @@ describe 'StubbedCommand' do
           FileUtils.remove_entry_secure dynamic_file
         end
       end
+
+      describe 'when given a filename that matches the stdout target' do
+        let(:stdout_file) { Pathname.new('stdout') }
+
+        before do
+          command
+            .outputs('i am supposed to go to a file', to: 'stdout')
+        end
+
+        execute_script('stubbed_command poglet piglet')
+
+        it 'outputs the expected content to the file' do
+          expect(stdout_file.read).to eql 'i am supposed to go to a file'
+        end
+
+        after(:each) do
+          FileUtils.remove_entry_secure stdout_file
+        end
+      end
     end
 
     describe 'any target' do
