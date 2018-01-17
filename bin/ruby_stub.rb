@@ -17,16 +17,16 @@ sock.close_read
 
 exit 0 if conf_from_server.empty?
 
-(conf_from_server[:outputs] || []).each do |data|
-  if data[:target] == :stdout
+(conf_from_server[:outputs] || []).each do |target, data|
+  if target == :stdout
     $stdout.print data[:content]
     next
   end
-  if data[:target] == :stderr
+  if target == :stderr
     $stderr.print data[:content]
     next
   end
-  Pathname.new(data[:target]).open('w') do |f|
+  Pathname.new(target).open('w') do |f|
     f.print data[:content]
   end
 end

@@ -298,6 +298,18 @@ describe 'StubbedCommand' do
           expect(stdout).to eql '["an array"]'
         end
       end
+      context 'when given multiple outputs settings' do
+        before do
+          command.outputs('first output', to: :stdout)
+          command.outputs('second output', to: :stdout)
+        end
+
+        execute_script('stubbed_command first_argument second_argument')
+
+        it 'outputs only the results from the second call to outputs' do
+          expect(stdout).to eql 'second output'
+        end
+      end
     end
   end
 end

@@ -12,7 +12,7 @@ describe 'CallConfiguration' do
             {
               args: %w(first_argument second_argument),
               exitcode: 1,
-              outputs: []
+              outputs: {}
             }
           ]
         end
@@ -28,13 +28,13 @@ describe 'CallConfiguration' do
             {
               args: %w(first_argument),
               exitcode: 1,
-              outputs: []
+              outputs: {}
             },
             {
 
               args: %w(first_argument second_argument),
               exitcode: 1,
-              outputs: []
+              outputs: {}
             }
           ]
         end
@@ -43,7 +43,7 @@ describe 'CallConfiguration' do
             {
               args: %w(first_argument),
               exitcode: 1,
-              outputs: []
+              outputs: {}
             }
           ]
         end
@@ -58,7 +58,7 @@ describe 'CallConfiguration' do
             {
               args: %w(first_argument second_argument),
               exitcode: 1,
-              outputs: []
+              outputs: {}
             }
           ]
         end
@@ -67,7 +67,7 @@ describe 'CallConfiguration' do
             {
               args: %w(first_argument second_argument),
               exitcode: 2,
-              outputs: []
+              outputs: {}
             }
           ]
         end
@@ -87,13 +87,13 @@ describe 'CallConfiguration' do
             {
               args: %w(first_argument second_argument),
               exitcode: 0,
-              outputs: [
-                {
+              outputs: {
+                stderr: {
                   target: :stderr,
                   type: :stderr,
                   content: '2'
                 }
-              ]
+              }
             }
           ]
         end
@@ -108,13 +108,13 @@ describe 'CallConfiguration' do
             {
               args: %w(first_argument second_argument),
               exitcode: 0,
-              outputs: [
-                {
+              outputs: {
+                stderr: {
                   target: :stderr,
                   type: :stderr,
                   content: 'new_content'
                 }
-              ]
+              }
             }
           ]
         end
@@ -129,24 +129,24 @@ describe 'CallConfiguration' do
             {
               args: %w(first_argument),
               exitcode: 1,
-              outputs: [
-                {
+              outputs: {
+                stdout: {
                   target: :stdout,
                   type: :stdout,
                   content: 'different_content'
                 }
-              ]
+              }
             },
             {
               args: %w(first_argument second_argument),
               exitcode: 0,
-              outputs: [
-                {
+              outputs: {
+                stderr: {
                   target: :stderr,
                   type: :stderr,
                   content: 'new_content'
                 }
-              ]
+              }
             }
           ]
         end
@@ -155,13 +155,13 @@ describe 'CallConfiguration' do
             {
               args: %w(first_argument),
               exitcode: 1,
-              outputs: [
-                {
+              outputs: {
+                stdout: {
                   target: :stdout,
                   type: :stdout,
                   content: 'different_content'
                 }
-              ]
+              }
             }
           ]
         end
@@ -176,18 +176,18 @@ describe 'CallConfiguration' do
             {
               args: %w(first_argument second_argument),
               exitcode: 1,
-              outputs: [
-                {
+              outputs: {
+                stdout: {
                   target: :stdout,
                   type: :stdout,
                   content: 'old_content'
                 },
-                {
+                stderr: {
                   target: :stderr,
                   type: :stderr,
                   content: 'new_content'
                 }
-              ]
+              }
             }
           ]
         end
@@ -196,19 +196,35 @@ describe 'CallConfiguration' do
             {
               args: %w(first_argument second_argument),
               exitcode: 1,
-              outputs: [
-                {
+              outputs: {
+                stdout: {
                   target: :stdout,
                   type: :stdout,
                   content: 'old_content'
                 }
-              ]
+              }
             }
           ]
         end
         it 'adds to the outputs conf for the arguments passed in' do
           subject.add_output('new_content', :stderr, %w(first_argument second_argument))
           expect(subject.call_configuration).to eql expected_conf
+        end
+        it 'replaces the outputs conf for the matching target' do
+          subject.add_output('new_content', :stdout, %w(first_argument second_argument))
+          expect(subject.call_configuration).to eql [
+            {
+              args: %w(first_argument second_argument),
+              exitcode: 1,
+              outputs: {
+                stdout: {
+                  target: :stdout,
+                  type: :stdout,
+                  content: 'new_content'
+                }
+              }
+            }
+          ]
         end
       end
     end
@@ -227,7 +243,7 @@ describe 'CallConfiguration' do
             {
               args: %w(first_argument),
               exitcode: 1,
-              outputs: []
+              outputs: {}
             }
           ]
         end
@@ -240,11 +256,17 @@ describe 'CallConfiguration' do
         let(:expected_conf) do
           {
             exitcode: 2,
-            outputs: [
-              target: 'first_argument-something-second_argument-another.txt',
-              type: :file,
-              content: 'dynamically generated file name contents'
-            ]
+            outputs: {
+              'first_argument-something-second_argument-another.txt' => {
+                target: 'first_argument-something-second_argument-another.txt',
+                type: :file,
+                content: 'dynamically generated file name contents'
+              },
+              stdout: {
+                target: :stdout,
+                content: 'stdout content'
+              }
+            }
           }
         end
         before do
@@ -252,16 +274,27 @@ describe 'CallConfiguration' do
             {
               args: %w(first_argument second_argument),
               exitcode: 2,
-              outputs: [
-                target: [
+              outputs: {
+                [
                   :arg1,
                   '-something-',
                   :arg2,
                   '-another.txt'
-                ],
-                type: :file,
-                content: 'dynamically generated file name contents'
-              ]
+                ] => {
+                  target: [
+                    :arg1,
+                    '-something-',
+                    :arg2,
+                    '-another.txt'
+                  ],
+                  type: :file,
+                  content: 'dynamically generated file name contents'
+                },
+                stdout: {
+                  target: :stdout,
+                  content: 'stdout content'
+                }
+              }
             }
           ]
         end
@@ -269,6 +302,12 @@ describe 'CallConfiguration' do
         it 'returns the matching hash with args removed and paths adjusted' do
           call_conf = subject.get_best_call_conf(%w(first_argument second_argument))
           expect(call_conf).to eql expected_conf
+        end
+
+        it 'returns a copy of the conf it found' do
+          call_conf = subject.get_best_call_conf(%w(first_argument second_argument))
+          expect(call_conf.object_id)
+            .to_not eql subject.call_configuration[0].object_id
         end
       end
     end

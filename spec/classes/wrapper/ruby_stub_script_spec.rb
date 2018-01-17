@@ -133,20 +133,20 @@ describe 'RubyStubFunction' do
     before do
       stdout_configuration = {
         args: [],
-        outputs: [
-          {
+        outputs: {
+          stderr: {
             target: :stderr,
             content: "stderr\n"
           },
-          {
+          stdout: {
             target: :stdout,
             content: "stdout\n"
           },
-          {
+          'tofile' => {
             target: 'tofile',
             content: "tofile\n"
           }
-        ],
+        },
         exitcode: 8
       }
       allow(stub_socket).to receive(:read).and_return(Marshal.dump(stdout_configuration))

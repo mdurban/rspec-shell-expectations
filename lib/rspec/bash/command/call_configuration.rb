@@ -17,7 +17,7 @@ module Rspec
       def add_output(content, target, args = [])
         current_conf = create_or_get_conf(args)
         type = determine_output_type(target)
-        current_conf[:outputs] << {
+        current_conf[:outputs][target] = {
           target: target,
           type: type,
           content: content.to_s
@@ -29,7 +29,7 @@ module Rspec
         best_call_conf = call_conf_arg_matcher.get_best_call_conf(args)
         remove_args_from_conf(
           interpolate_output_targets(
-            best_call_conf,
+            copy_conf(best_call_conf),
             args
           )
         )
@@ -39,8 +39,13 @@ module Rspec
 
       def interpolate_output_targets(conf, args)
         return conf if conf.empty?
-        conf[:outputs].each do |output|
-          output[:target] = interpolate_target(output[:target], args)
+        conf[:outputs].keys.each do |target|
+          interpolated_target = interpolate_target(target, args)
+          next if interpolated_target == target
+
+          conf[:outputs][interpolated_target] = conf[:outputs][target]
+          conf[:outputs][interpolated_target][:target] = interpolated_target
+          conf[:outputs].delete(target)
         end
         conf
       end
@@ -60,18 +65,23 @@ module Rspec
       end
 
       def remove_args_from_conf(conf)
-        conf.select { |key| ![:args].include?(key) }
+        conf.delete(:args)
+        conf
       end
 
       def create_or_get_conf(args)
         new_conf = {
           args: args,
           exitcode: 0,
-          outputs: []
+          outputs: {}
         }
         current_conf = @call_configuration.select { |conf| conf[:args] == args }
         @call_configuration << new_conf if current_conf.empty?
         current_conf.first || new_conf
+      end
+
+      def copy_conf(configuration)
+        Marshal.load(Marshal.dump(configuration))
       end
 
       def determine_output_type(target)
